@@ -1,0 +1,557 @@
+{
+  "name": "My workflow 8",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "essay",
+              "cssSelector": "table table a",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "21408145-24a5-4b1d-bb5b-73adcfe742d6",
+      "name": "Extract essay names",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        -1088,
+        288
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "essay",
+        "options": {}
+      },
+      "id": "c4668f54-eff6-4b8b-91c1-81c37b1f3a95",
+      "name": "Split out into items",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -896,
+        304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "=http://www.paulgraham.com/{{ $json.essay }}",
+        "options": {}
+      },
+      "id": "214c1bbb-be4e-4109-848a-538482495358",
+      "name": "Fetch essay texts",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -496,
+        304
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": "title"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4f7ded96-6f52-4bb7-88d5-23df233e8299",
+      "name": "Extract title",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operationMode": "documentLoader",
+        "options": {}
+      },
+      "id": "9a153b8c-4326-44d5-a510-67c552b6e5a4",
+      "name": "Summarization Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "position": [
+        0,
+        304
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7b337b47-a1c6-470e-881f-0c038b4917e5",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "id": "ca820521-4fff-4971-84b5-e6e2dbd8bb7a",
+              "name": "summary",
+              "type": "string",
+              "value": "={{ $json.response.text }}"
+            },
+            {
+              "id": "0fd9b5e3-44dd-49a3-82c1-3a4aa4698376",
+              "name": "url",
+              "type": "string",
+              "value": "=http://www.paulgraham.com/{{ $('Limit to first 3').first().json.essay }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f2336a1f-09d1-4b3b-bf49-20bf7bfb6b05",
+      "name": "Clean up",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        704,
+        304
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "9b2d40ea-145a-4fce-9ce1-1bc583f514b1",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        512,
+        304
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Extract Text Only').item.json.data }}",
+        "options": {}
+      },
+      "id": "5af9c6c1-c6ef-469f-b907-2ab304c3fff3",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        80,
+        528
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkSize": 6000,
+        "options": {}
+      },
+      "id": "04421f2c-1036-4710-b3a0-55782e68ecd7",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        160,
+        640
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "id": "fb5c1916-1147-4d6a-8928-365ba705901d",
+      "name": "Limit to first 3",
+      "type": "n8n-nodes-base.limit",
+      "position": [
+        -704,
+        304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "data",
+              "cssSelector": "body",
+              "skipSelectors": "img,nav"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a353a699-46f2-4444-88ab-38ad7bbb0e8a",
+      "name": "Extract Text Only",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        -176,
+        304
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        512
+      ],
+      "id": "0b495df8-9e4c-43b5-ba28-f911d9365e67",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PgGidm6mpYw9JeN1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://www.paulgraham.com/articles.html",
+        "options": {}
+      },
+      "id": "20768c56-cc9e-47ac-80c4-831d99949c75",
+      "name": "Fetch Essay List",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1296,
+        304
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "formTitle": "articles",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "url",
+              "placeholder": "Article URL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -1536,
+        304
+      ],
+      "id": "867d07b3-46fa-4e5a-aa2d-c56cbba5ef78",
+      "name": "On form submission",
+      "webhookId": "a6556a1b-172d-4b93-bcfc-a9c075147bc2"
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "article sum",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        960,
+        368
+      ],
+      "id": "b57d4e41-1f5d-4017-b28d-771ee585b44e",
+      "name": "Create spreadsheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aHHmu9XDcrDksWtB",
+          "name": "Google Sheets account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1uwCfuKNFYfN5cfia_sO28x01K7iFB8VSsxp7l6CETBA",
+          "mode": "list",
+          "cachedResultName": "article sum",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uwCfuKNFYfN5cfia_sO28x01K7iFB8VSsxp7l6CETBA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uwCfuKNFYfN5cfia_sO28x01K7iFB8VSsxp7l6CETBA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "properties": "={{ $json.properties }}",
+            "sheets": "={{ $json.sheets[0].properties.sheetId }}",
+            "spreadsheetUrl": "={{ $json.spreadsheetUrl }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "spreadsheetId",
+              "displayName": "spreadsheetId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "properties",
+              "displayName": "properties",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sheets",
+              "displayName": "sheets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "spreadsheetUrl",
+              "displayName": "spreadsheetUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        368
+      ],
+      "id": "ef594980-ab55-4a4f-98b9-881a591e6faf",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aHHmu9XDcrDksWtB",
+          "name": "Google Sheets account 4"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Clean up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract title": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit to first 3": {
+      "main": [
+        [
+          {
+            "node": "Fetch essay texts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text Only": {
+      "main": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch essay texts": {
+      "main": [
+        [
+          {
+            "node": "Extract title",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract Text Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract essay names": {
+      "main": [
+        [
+          {
+            "node": "Split out into items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarization Chain": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Split out into items": {
+      "main": [
+        [
+          {
+            "node": "Limit to first 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Fetch Essay List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Essay List": {
+      "main": [
+        [
+          {
+            "node": "Extract essay names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean up": {
+      "main": [
+        [
+          {
+            "node": "Create spreadsheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4a05cf76-b2d2-40f7-a442-377c89c21f80",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "af757e283ec7cc0710c22d729c9f5812d76bce36cb585fc360074c88a86b106a"
+  },
+  "id": "jc7tvLlhyszOqrBQ",
+  "tags": []
+}
