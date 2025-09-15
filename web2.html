@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceMatch Pro | Advanced Face Recognition</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --gray: #95a5a6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            font-weight: 300;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        h2:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--secondary);
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--gray);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--secondary);
+        }
+        
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--gray);
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: var(--secondary);
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .camera-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        
+        #video {
+            width: 100%;
+            border-radius: 8px;
+            background: var(--dark);
+        }
+        
+        .capture-btn {
+            display: block;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid var(--secondary);
+            margin: 1rem auto;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .capture-btn:after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--secondary);
+            border-radius: 50%;
+            top: 6px;
+            left: 6px;
+        }
+        
+        .results {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .result-card {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .result-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .result-content {
+            padding: 1.5rem;
+        }
+        
+        .confidence-meter {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .confidence-level {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 1s ease;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .results {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">FaceMatch Pro</div>
+        <div class="tagline">Advanced Face Recognition Technology</div>
+    </header>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Upload Image for Recognition</h2>
+            <div class="upload-area" id="dropZone">
+                <i>📁</i>
+                <p>Drag & drop an image here or click to browse</p>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            </div>
+            <button class="btn btn-primary" id="processBtn">Process Image</button>
+        </div>
+        
+        <div class="card">
+            <h2>Use Your Camera</h2>
+            <div class="camera-container">
+                <video id="video" autoplay playsinline></video>
+            </div>
+            <div class="capture-btn" id="captureBtn"></div>
+            <button class="btn" id="startCamera">Start Camera</button>
+        </div>
+        
+        <div class="card">
+            <h2>Recognition Results</h2>
+            <div class="results">
+                <div class="result-card">
+                    <img src="" class="result-img" id="inputImage" alt="Input image">
+                    <div class="result-content">
+                        <h3>Input Image</h3>
+                        <p>Image ready for processing</p>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <img src="" class="result-img" id="resultImage" alt="Result image">
+                    <div class="result-content">
+                        <h3>Recognition Result</h3>
+                        <p>Confidence Level:</p>
+                        <div class="confidence-meter">
+                            <div class="confidence-level" id="confidenceLevel"></div>
+                        </div>
+                        <p id="resultText">Upload an image or take a picture to begin</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>FaceMatch Pro &copy; 2023 | Advanced Face Recognition System</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const processBtn = document.getElementById('processBtn');
+        const startCameraBtn = document.getElementById('startCamera');
+        const video = document.getElementById('video');
+        const captureBtn = document.getElementById('captureBtn');
+        const inputImage = document.getElementById('inputImage');
+        const resultImage = document.getElementById('resultImage');
+        const confidenceLevel = document.getElementById('confidenceLevel');
+        const resultText = document.getElementById('resultText');
+        
+        // Event Listeners
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('drop', handleDrop);
+        processBtn.addEventListener('click', processImage);
+        startCameraBtn.addEventListener('click', startCamera);
+        captureBtn.addEventListener('click', captureImage);
+        
+        // Drag and Drop Functions
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = var(--secondary);
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const files = e.dataTransfer.files;
+            if (files.length && files[0].type.startsWith('image/')) {
+                fileInput.files = files;
+                displaySelectedImage(files[0]);
+            }
+        }
+        
+        function handleFileSelect(e) {
+            if (e.target.files.length) {
+                displaySelectedImage(e.target.files[0]);
+            }
+        }
+        
+        function displaySelectedImage(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                inputImage.src = e.target.result;
+                resultImage.src = '';
+                confidenceLevel.style.width = '0%';
+                resultText.textContent = 'Click "Process Image" to analyze';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Camera Functions
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 1280, height: 720 } 
+                });
+                video.srcObject = stream;
+                startCameraBtn.textContent = 'Camera Active';
+                startCameraBtn.style.background = var(--success);
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                alert('Unable to access camera. Please check permissions.');
+            }
+        }
+        
+        function captureImage() {
+            if (!video.srcObject) {
+                alert('Please start the camera first.');
+                return;
+            }
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(function(blob) {
+                const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+                
+                displaySelectedImage(file);
+            }, 'image/jpeg');
+        }
+        
+        // Process Image (This would connect to your face recognition model)
+        function processImage() {
+            if (!fileInput.files.length) {
+                alert('Please select an image first.');
+                return;
+            }
+            
+            // Simulate processing delay
+            processBtn.textContent = 'Processing...';
+            processBtn.disabled = true;
+            
+            // In a real implementation, you would send the image to your model API
+            // For demonstration, we're using a mock result
+            setTimeout(() => {
+                // Mock results for demonstration
+                const confidence = Math.random() * 100;
+                confidenceLevel.style.width = `${confidence}%`;
+                
+                // Display a mock result image (same as input for demo)
+                resultImage.src = inputImage.src;
+                
+                // Display result text based on confidence
+                if (confidence > 80) {
+                    resultText.textContent = 'Match found with high confidence!';
+                    confidenceLevel.style.background = var(--success);
+                } else if (confidence > 50) {
+                    resultText.textContent = 'Possible match with medium confidence.';
+                    confidenceLevel.style.background = var(--warning);
+                } else {
+                    resultText.textContent = 'No confident match found.';
+                    confidenceLevel.style.background = var(--accent);
+                }
+                
+                processBtn.textContent = 'Process Image';
+                processBtn.disabled = false;
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
